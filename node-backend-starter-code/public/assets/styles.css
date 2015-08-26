@@ -24,3 +24,7 @@
 body {
   background: lemonchiffon;
 }
+
+li {
+  list-style: none;
+}
