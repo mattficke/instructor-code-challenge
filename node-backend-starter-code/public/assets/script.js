@@ -14,9 +14,9 @@ document.querySelector("form.movie-form").addEventListener("submit", function() 
   getMovie(searchTerm, "s");
 });
 
+// display show favorites form
 document.querySelector("a.show-fav").addEventListener("click", function() {
   event.preventDefault();
-  console.log("fav clicked")
   var favList = document.querySelector("div.fav-list")
   favList.innerHTML = null;
   getUserName()
@@ -24,6 +24,8 @@ document.querySelector("a.show-fav").addEventListener("click", function() {
 
 // API call
 function getMovie(movie, method) {
+  var favList = document.querySelector("div.fav-list")
+  favList.innerHTML = null;
   var url = "http://www.omdbapi.com/?" + method + "=" + movie + "&r=json"
   var ajax = new XMLHttpRequest();
   ajax.open("GET",url,true);
@@ -116,7 +118,6 @@ function addFavorite(movie) {
 
 // get user name
 function getUserName() {
-  console.log("show fav")
   var favList = document.querySelector("div.fav-list")
   favList.style.display = "intitial"
   var node = document.createElement("DIV")
@@ -146,29 +147,26 @@ function getUserName() {
 
 // get user favorites
 function getFavorites(name) {
-  console.log(name)
   var url = "/favorites"
   var ajax = new XMLHttpRequest();
   ajax.open("GET",url,true);
   ajax.onload = function() {
     var text = ajax.responseText
     var response = JSON.parse(text);
-    console.log(response)
     showFavorites(response)
   }
   ajax.send()
 }
 
+// append favorites list as links
 function showFavorites(response) {
   var favList = document.querySelector("div.fav-list")
   for (var i=0; i<response.length; i++)   {
-    console.log(response[i]["oid"])
     var url = "http://www.omdbapi.com/?i=" + response[i]["oid"] + "&r=json"
     var ajax = new XMLHttpRequest();
     ajax.open("GET",url,true);
     ajax.onload = function() {
       var text = ajax.responseText
-      console.log(text)
       var movie = JSON.parse(text);
       var link = document.createElement("A")
       link.setAttribute("href", "/")
