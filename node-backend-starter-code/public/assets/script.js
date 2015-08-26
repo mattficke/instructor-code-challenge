@@ -4,12 +4,23 @@ document.querySelector("form.movie-form").addEventListener("submit", function() 
   var searchTerm = document.querySelector(".movie-name").value;
   var movieList = document.querySelector("ul.movie-list");
   var movieInfo = document.querySelector("div.movie-info");
+  var favList = document.querySelector("div.fav-list")
   movieInfo.style.display = "none" //hide movie info
+  favList.style.display = "none"
   movieList.style.display = "initial" //show movie list
+  favList.innerHTML = null;
   movieList.innerHTML = null;
   movieInfo.innerHTML = null;
   getMovie(searchTerm, "s");
 });
+
+document.querySelector("a.show-fav").addEventListener("click", function() {
+  event.preventDefault();
+  console.log("fav clicked")
+  var favList = document.querySelector("div.fav-list")
+  favList.innerHTML = null;
+  getUserName()
+})
 
 // API call
 function getMovie(movie, method) {
@@ -64,13 +75,13 @@ function showMovie(movie) {
 
   var fav = document.createElement("A"); // add favorites link
   var name = document.createElement("input")
-  name.setAttribute("placeholder", "name")
+  name.setAttribute("placeholder", " your name")
   name.setAttribute("name", "name")
   var favText = document.createTextNode("Add to favorites");
   fav.setAttribute("href", "/");
   fav.setAttribute("class", "add-favorite")
   fav.appendChild(favText);
-  fav.addEventListener("click", function(){ // show "add to favs" form on click
+  fav.addEventListener("click", function(){ // add to favs
     event.preventDefault();
     addFavorite(movie)
   })
@@ -85,13 +96,11 @@ function showMovie(movie) {
   document.querySelector("div.movie-info").appendChild(node) // append info to parent element
 }
 
+// add movie to favorites list
 function addFavorite(movie) {
   var name = document.querySelector("input[name='name']").value
   if(name) {
     var url = "http://localhost:3000/favorites"
-    var data = {
-
-    }
     var ajax = new XMLHttpRequest();
     ajax.open("POST", url, true);
     ajax.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
@@ -102,5 +111,77 @@ function addFavorite(movie) {
     ajax.send("name=" + name + "&oid=" + movie.imdbID);
   } else {
     alert("Name Required");
+  }
+}
+
+// get user name
+function getUserName() {
+  console.log("show fav")
+  var favList = document.querySelector("div.fav-list")
+  favList.style.display = "intitial"
+  var node = document.createElement("DIV")
+  node.setAttribute("class", "fav-div")
+
+  var name = document.createElement("input")
+  name.setAttribute("placeholder", " your name")
+  name.setAttribute("name", "name")
+
+  var submit = document.createElement("INPUT")
+  submit.setAttribute("type", "submit")
+  submit.addEventListener("click", function() {
+    event.preventDefault()
+    var name = document.querySelector("input[name='name']").value
+    if (name) {
+      getFavorites(name)
+    } else {
+      alert("Name Required")
+    }
+  })
+
+  node.appendChild(name)
+  node.appendChild(submit)
+
+  favList.appendChild(node)
+}
+
+// get user favorites
+function getFavorites(name) {
+  console.log(name)
+  var url = "/favorites"
+  var ajax = new XMLHttpRequest();
+  ajax.open("GET",url,true);
+  ajax.onload = function() {
+    var text = ajax.responseText
+    var response = JSON.parse(text);
+    console.log(response)
+    showFavorites(response)
+  }
+  ajax.send()
+}
+
+function showFavorites(response) {
+  var favList = document.querySelector("div.fav-list")
+  for (var i=0; i<response.length; i++)   {
+    console.log(response[i]["oid"])
+    var url = "http://www.omdbapi.com/?i=" + response[i]["oid"] + "&r=json"
+    var ajax = new XMLHttpRequest();
+    ajax.open("GET",url,true);
+    ajax.onload = function() {
+      var text = ajax.responseText
+      console.log(text)
+      var movie = JSON.parse(text);
+      var link = document.createElement("A")
+      link.setAttribute("href", "/")
+      var textnode = document.createTextNode(movie.Title)
+      link.appendChild(textnode);
+      link.setAttribute("value", movie.imdbID)
+      link.addEventListener("click", function(){ // click triggers API call
+        event.preventDefault();
+        var id = this.getAttribute("value");
+        getMovie(id, "i"); // API call
+      })
+      favList.appendChild(link)
+    }
+    ajax.send()
   }
 }
