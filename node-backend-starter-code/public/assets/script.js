@@ -10,12 +10,21 @@ function getMovie(searchTerm) {
   var ajax = new XMLHttpRequest();
   ajax.open("GET",url,true);
   ajax.onload = function() {
-    var response = ajax.responseText
-    listMovies(response);
+    var text = ajax.responseText
+    var response = JSON.parse(text);
+    console.log(response)
+    listMovies(response.Search);
   }
   ajax.send();
 }
 
-function listMovies(response) {
-  
+function listMovies(list) {
+  for(var i=0; i<list.length; i++) {
+    console.log(list[i])
+    var node = document.createElement("LI")
+    var textnode = document.createTextNode(list[i].Title)
+    node.appendChild(textnode)
+    document.querySelector("ul.movie-list").appendChild(node)
+  }
+
 }
